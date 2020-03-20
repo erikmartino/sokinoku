@@ -1,0 +1,7 @@
+.game_board > div > .block {
+    display: inline-block;
+    width: 64px;
+    height: 64px;
+    background-color: gray;
+    background-image: url("./game/Crate_Beige.png");
+}
