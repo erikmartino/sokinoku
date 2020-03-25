@@ -1,7 +1,48 @@
-.game_board > div > .block {
+.game {
+    display: block;
+    position: relative;
+}
+
+.game_board {
+    display: grid;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    grid-auto-columns: min-content;
+    grid-template: repeat(8, 0fr) / repeat(8, 0fr);
+}
+
+.game_board > div {
     display: inline-block;
     width: 64px;
     height: 64px;
-    background-color: gray;
-    background-image: url("./game/Crate_Beige.png");
+    background-color: #abc;
+}
+
+.wall {
+    background-image: url("game/Wall_Brown.png");
+}
+
+.floor {
+    background-image: url("game/Ground_Sand.png");
+}
+
+.game_pieces div {
+    position: absolute;
+    width: 64px;
+    height: 64px;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.player {
+    background-image: url("game/Character1.png");
+}
+
+.crate {
+    background-image: url("game/Crate_Red.png");
+}
+
+.endpoint {
+    background-image: url("game/EndPoint_Red.png");
 }
