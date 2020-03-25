@@ -27,7 +27,7 @@ enum DIRECTION {
     RIGHT, UP, LEFT, DOWN
 }
 
-class GameState implements State {
+class GameState {
     constructor() {
         this.width = 8;
         this.height = 9;
@@ -124,7 +124,7 @@ const CLASSNAMES: { [key: string]: string; } = {
     ".": "endpoint",
 };
 
-interface State {
+interface GameRules {
     width: number;
     height: number;
     board: string;
@@ -135,37 +135,48 @@ interface State {
     tiles(x: number, y: number): string;
 }
 
-export class GameBoard extends React.Component<Props, State> {
+class State {
+    constructor() {
+        this.n = 0;
+    }
+    n: number;
+    incr() {
+        this.n++;
+        return this;
+    }
+}
+
+export class GameBoard extends React.Component<Props, GameState> {
     private keyDown: (e: KeyboardEvent) => void;
+    private game: GameState;
 
     constructor(props: Props) {
         super(props);
-        this.state = new GameState();
-        this.keyDown = (e: KeyboardEvent) => this.keyPresses(e);
+        this.game = new GameState();
+        this.setState(this.game);
+        this.keyDown = (e: KeyboardEvent) => {
+            this.keyPresses(e);
+        }
     }
 
     keyPresses(event: KeyboardEvent) {
         switch (event.code) {
             case "ArrowRight":
-                this.state.move(DIRECTION.RIGHT);
+                this.game.move(DIRECTION.RIGHT);
                 break;
             case "ArrowUp":
-                this.state.move(DIRECTION.UP);
+                this.game.move(DIRECTION.UP);
                 break;
             case "ArrowLeft":
-                this.state.move(DIRECTION.LEFT);
+                this.game.move(DIRECTION.LEFT);
                 break;
             case "ArrowDown":
-                this.state.move(DIRECTION.LEFT);
+                this.game.move(DIRECTION.DOWN);
                 break;
             default:
                 console.log(event.code);
         }
-        this.setState(this.state);
-    }
-
-    shouldComponentUpdate() {
-        return true;
+        this.setState(this.game);
     }
 
     componentDidMount() {
@@ -178,9 +189,9 @@ export class GameBoard extends React.Component<Props, State> {
 
     renderedTiles(): React.ReactElement[] {
         let cells: React.ReactElement[] = []
-        for (let i = 0; i < this.state.height; i++) {
-            for (let j = 0; j < this.state.width; j++) {
-                let p = this.state.tiles(j, i);
+        for (let i = 0; i < this.game.height; i++) {
+            for (let j = 0; j < this.game.width; j++) {
+                let p = this.game.tiles(j, i);
                 let classNames = CLASSNAMES[p];
                 cells.push(<div key={i + ',' + j} className={classNames}/>);
             }
@@ -190,10 +201,10 @@ export class GameBoard extends React.Component<Props, State> {
 
     renderedPieces(): React.ReactElement[] {
         let pieces: React.ReactElement[] = []
-        this.state.pieces.forEach(p => {
+        this.game.pieces.forEach(p => {
             let classNames = CLASSNAMES[p.piece];
             let style = {left: 64 * p.x + 'px', top: 64 * p.y + 'px'};
-            pieces.push(<div key={'piece' + p.x + ',' + p.y} className={classNames} style={style}/>)
+            pieces.push(<div key={encodeURI(p.piece)+'p' + p.x + ',' + p.y} className={classNames} style={style}/>)
         });
         console.log(pieces);
         return pieces;
