@@ -153,7 +153,6 @@ export class GameBoard extends React.Component<Props, GameState> {
     constructor(props: Props) {
         super(props);
         this.game = new GameState();
-        this.setState(this.game);
         this.keyDown = (e: KeyboardEvent) => {
             this.keyPresses(e);
         }
