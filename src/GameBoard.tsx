@@ -16,6 +16,22 @@ class Piece {
     x: number;
     y: number;
     piece: string;
+
+    isPlayer(): boolean {
+        return this.piece === '@';
+    }
+
+    isMovable(): boolean {
+        return this.piece === '$';
+    }
+
+    isEndpoint(): boolean {
+        return this.piece === '.';
+    }
+
+    isBlocking(): boolean {
+        return this.isMovable();
+    }
 }
 
 interface Props {
@@ -47,6 +63,10 @@ class GameState {
         this.extractPieces('$');
     }
 
+    isFloor(x: number, y: number): boolean {
+        return this.tiles(x, y) === ' ';
+    }
+
     extractPieces(p: string) {
         let pieces = this.pieces;
         let board = this.board;
@@ -64,7 +84,7 @@ class GameState {
             pieces.push(new Piece(x, y, p));
         }
 
-        board = board.replace(p, ' ');
+        board = board.replace(p, ' '); // floor
         this.board = board;
         this.pieces = pieces;
     }
@@ -82,36 +102,77 @@ class GameState {
         return this.board[x + (this.width + 1) * y];
     }
 
+    piece(x: number, y: number): Piece[] {
+        return this.pieces.filter(p => p.x === x && p.y === y);
+    }
+
+    /**
+     * Is the tile a floor where nothing is blocking a box
+     * @param x
+     * @param y
+     */
+    isFree(x: number, y: number): boolean {
+        return (this.isFloor(x, y) && this.piece(x, y).filter(bp => bp.isBlocking()).length === 0);
+    }
+
     move(dir: DIRECTION): void {
-        this.pieces.filter(p => p.piece === '@').forEach(p => {
-            let x = p.x;
-            let y = p.y;
+        let p = this.pieces.filter(p => p.isPlayer())[0];
+        // current player position
+        let x = p.x;
+        let y = p.y;
 
-            switch (dir) {
-                case DIRECTION.RIGHT:
-                    x++;
-                    break;
-                case DIRECTION.UP:
-                    y--;
-                    break;
-                case DIRECTION.LEFT:
-                    x--;
-                    break;
-                case DIRECTION.DOWN:
-                    y++;
-                    break;
-            }
+        // set position to the cell in the given direction
+        switch (dir) {
+            case DIRECTION.RIGHT:
+                x++;
+                break;
+            case DIRECTION.UP:
+                y--;
+                break;
+            case DIRECTION.LEFT:
+                x--;
+                break;
+            case DIRECTION.DOWN:
+                y++;
+                break;
+        }
 
-            if (this.tiles(x, y) !== ' ') {
+        // we can only move on floor
+        if (!this.isFloor(x, y)) {
+            return;
+        }
+
+        // push direction
+        let dx = x - p.x;
+        let dy = y - p.y;
+
+
+        // what is placed at this cell
+        let destPieces = this.piece(x, y);
+
+        // if anything is pushed, where to
+        let mx = x + dx;
+        let my = y + dy;
+
+        // is something movable blocking the push destination
+        if (this.piece(x, y).filter(pc => pc.isMovable()).length > 0) { // if anything is movable blocked
+            if (!this.isFree(mx, my)) { // is it possible to push the box
                 return;
             }
+        }
 
-            p.x = x;
-            p.y = y;
+        // move anything movable
+        this.piece(x, y)
+            .filter(pc => pc.isMovable())
+            .forEach(pc => {
+                pc.x = mx;
+                pc.y = my;
+            });
 
-
-            console.log('move ' + p.x + ',' + p.y);
-        });
+        // move player
+        p.x = x;
+        p.y = y;
+        console.log('move ' + p.x + ',' + p.y);
     }
 }
 
@@ -139,7 +200,9 @@ class State {
     constructor() {
         this.n = 0;
     }
+
     n: number;
+
     incr() {
         this.n++;
         return this;
@@ -203,7 +266,7 @@ export class GameBoard extends React.Component<Props, GameState> {
         this.game.pieces.forEach(p => {
             let classNames = CLASSNAMES[p.piece];
             let style = {left: 64 * p.x + 'px', top: 64 * p.y + 'px'};
-            pieces.push(<div key={encodeURI(p.piece)+'p' + p.x + ',' + p.y} className={classNames} style={style}/>)
+            pieces.push(<div key={encodeURI(p.piece) + 'p' + p.x + ',' + p.y} className={classNames} style={style}/>)
         });
         console.log(pieces);
         return pieces;
