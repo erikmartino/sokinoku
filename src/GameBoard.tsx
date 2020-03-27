@@ -1,6 +1,8 @@
 import React from 'react';
 import './game.css';
 
+import { Level } from './Levels';
+
 
 function parseBoard(board: string) {
     let rows: string[] = board.split(/\r?\n/);
