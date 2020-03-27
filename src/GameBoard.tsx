@@ -275,7 +275,7 @@ export class GameBoard extends React.Component<Props, GameState> {
     }
 
     render(): React.ReactElement {
-        return <div className='game'>
+        return <div className='game' title="Board">
             <div key='game_board' className="game_board">
                 {this.renderedTiles()}
             </div>
