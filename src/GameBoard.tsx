@@ -149,9 +149,6 @@ class GameState {
         let dy = y - p.y;
 
 
-        // what is placed at this cell
-        let destPieces = this.piece(x, y);
-
         // if anything is pushed, where to
         let mx = x + dx;
         let my = y + dy;

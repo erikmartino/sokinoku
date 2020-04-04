@@ -5,7 +5,7 @@
 
 .game_board {
     display: grid;
-    position: absolute;
+    position: relative;
     left: 0px;
     top: 0px;
     grid-auto-columns: min-content;
